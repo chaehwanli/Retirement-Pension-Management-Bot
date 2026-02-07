@@ -23,18 +23,21 @@ def main():
     
     # Load secrets
     service_key = secrets.get_google_service_key()
-    telegram_token = secrets.get_telegram_bot_token()
-    chat_id = secrets.get_telegram_chat_id()
+    telegram_configs = secrets.get_telegram_configs()
     
-    if not service_key or not telegram_token or not chat_id:
-        print("Error: Missing environment variables (GOOGLE_SERVICE_KEY, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID).")
+    if not service_key:
+        print("Error: Missing GOOGLE_SERVICE_KEY.")
+        return
+        
+    if not telegram_configs:
+        print("Error: Missing Telegram configurations (TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID).")
         return
 
     sheets_manager = GoogleSheetsManager(service_key)
     market_data = MarketDataFetcher()
     calculator = Calculator()
     reporter = Reporter()
-    bot = TelegramBot()
+    # bot = TelegramBot() # Initialized per config later
 
     # 2. Fetch Data from Google Sheets
     print(f"Fetching data from '{settings.SHEET_NAME_PORTFOLIO}'...")
@@ -56,14 +59,8 @@ def main():
             item['현재가'] = prices[ticker]
     
     # Update Google Sheet with new prices
-    # Note: This requires mapping '현재가' to a column index. 
-    # For now, let's assume '현재가' is a column name and use a helper if needed.
-    # To be safe and efficient, let's update column-wise if the sheet structure is known.
-    # For simplicity in this v1, we iterate rows (slow but safe) or just trust the local calculation for the report.
-    # Better: Update the '현재가' column in the sheet.
     price_list = []
     for item in portfolio_data:
-        # Re-match because dict order might vary? No, list order is preserved.
         price_list.append(item.get('현재가', 0))
     
     sheets_manager.update_column(settings.SHEET_NAME_PORTFOLIO, '현재가', price_list)
@@ -74,10 +71,10 @@ def main():
     total_profit = total_value - total_invested
     
     # 5. Execute Logic based on Mode
+    message = ""
     if args.mode == "reminder":
         print("Running in REMINDER mode...")
         message = reporter.generate_reminder_message(total_value, total_profit)
-        bot.send_message(chat_id, message)
         
     elif args.mode == "rebalancing":
         print("Running in REBALANCING mode...")
@@ -88,8 +85,14 @@ def main():
         simulation_result = calculator.simulate_isa(total_profit)
         
         # Generate detailed report
-        report = reporter.generate_rebalancing_report(portfolio_data, suggestions, simulation_result)
-        bot.send_message(chat_id, report)
+        message = reporter.generate_rebalancing_report(portfolio_data, suggestions, simulation_result)
+    
+    # Send to all configured Telegram recipients
+    if message:
+        for config in telegram_configs:
+            bot = TelegramBot(token=config['token'])
+            bot.send_message(config['chat_id'], message)
+            print(f"Message sent to Chat ID: {config['chat_id']}")
         
         # TODO: Wiki publishing can be added here
         

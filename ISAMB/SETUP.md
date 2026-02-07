@@ -33,6 +33,12 @@ Add the following:
 2.  **TELEGRAM_BOT_TOKEN**: Your Telegram Bot API token.
 3.  **TELEGRAM_CHAT_ID**: Your Telegram Chat ID (where the bot sends messages).
 
+4.  **(Optional) Multiple Recipients**:
+    - To send messages to additional users (e.g., spouse), add:
+    - `TELEGRAM_BOT_TOKEN_1`, `TELEGRAM_CHAT_ID_1`
+    - `TELEGRAM_BOT_TOKEN_2`, `TELEGRAM_CHAT_ID_2`
+    - You can add up to 5 additional recipients (suffixes `_1` to `_5`).
+
 ## 3. Local Execution (Testing)
 1.  Create a `.env` file in `ISAMB/` with the above secrets (for local testing).
 2.  Run:

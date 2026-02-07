@@ -3,8 +3,9 @@ import requests
 from config import secrets
 
 class TelegramBot:
-    def __init__(self):
-        self.token = secrets.get_telegram_bot_token()
+    def __init__(self, token=None):
+        # Use provided token or fallback to secrets (deprecated fallback)
+        self.token = token
         self.base_url = f"https://api.telegram.org/bot{self.token}/"
 
     def send_message(self, chat_id, text):
