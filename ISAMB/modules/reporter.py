@@ -6,7 +6,7 @@ class Reporter:
     def __init__(self):
         pass
 
-    def generate_reminder_message(self, total_value, total_profit):
+    def generate_reminder_message(self, total_value, total_profit, total_cash):
         """
         Generates a simple reminder message.
         """
@@ -18,18 +18,22 @@ class Reporter:
             f"Please update your Google Sheet with the latest holdings.\n\n"
             f"💰 *Current Estimate:*\n"
             f"- Total Value: {total_value:,.0f} KRW\n"
+            f"- Cash (Deposit): {total_cash:,.0f} KRW\n"
             f"- Total Profit: {total_profit:,.0f} KRW ({profit_percent:.2f}%)\n\n"
             f"[Google Sheet Link](YOUR_SHEET_URL)"
         )
         return message
 
-    def generate_rebalancing_report(self, holdings, suggestions, simulation_result):
+    def generate_rebalancing_report(self, holdings, suggestions, simulation_result, total_cash):
         """
         Generates a detailed rebalancing report.
         """
         now = datetime.now().strftime("%Y-%m-%d")
         
         report = f"📊 *ISAMB Quarterly Report* ({now})\n\n"
+        
+        # 0. Cash Status
+        report += f"💵 *Cash (Deposit):* {total_cash:,.0f} KRW\n\n"
         
         # 1. Rebalancing Suggestions
         if suggestions:

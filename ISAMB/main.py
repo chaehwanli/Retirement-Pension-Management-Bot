@@ -67,14 +67,14 @@ def main():
 
     # 4. Calculate Stats
     print("Calculating portfolio stats...")
-    total_value, total_invested = calculator.calculate_total_value(portfolio_data)
+    total_value, total_invested, total_cash = calculator.calculate_total_value(portfolio_data)
     total_profit = total_value - total_invested
     
     # 5. Execute Logic based on Mode
     message = ""
     if args.mode == "reminder":
         print("Running in REMINDER mode...")
-        message = reporter.generate_reminder_message(total_value, total_profit)
+        message = reporter.generate_reminder_message(total_value, total_profit, total_cash)
         
     elif args.mode == "rebalancing":
         print("Running in REBALANCING mode...")
@@ -85,7 +85,7 @@ def main():
         simulation_result = calculator.simulate_isa(total_profit)
         
         # Generate detailed report
-        message = reporter.generate_rebalancing_report(portfolio_data, suggestions, simulation_result)
+        message = reporter.generate_rebalancing_report(portfolio_data, suggestions, simulation_result, total_cash)
     
     # Send to all configured Telegram recipients
     if message:
