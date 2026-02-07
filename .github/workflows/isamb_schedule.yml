@@ -1,0 +1,55 @@
+
+name: ISAMB Routine
+
+on:
+  schedule:
+    # Run every Saturday at 00:00 UTC (09:00 KST)
+    - cron: '0 0 * * 6'
+  workflow_dispatch:
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: |
+          pip install -r ISAMB/requirements.txt
+
+      - name: Determine Mode and Run
+        env:
+          GOOGLE_SERVICE_KEY: ${{ secrets.GOOGLE_SERVICE_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          # Get current date info
+          MONTH=$(date +%m)
+          DAY=$(date +%d)
+          WEEK_NUM=$(date +%V) # ISO week number
+
+          # Logic:
+          # 1. Quarterly Rebalancing: First Saturday of Jan(01), Apr(04), Jul(07), Oct(10)
+          #    Since we run on Saturdays (cron), we just need to check if Month match and Day <= 7.
+          
+          if [[ "$DAY" -le 7 ]] && [[ "$MONTH" =~ ^(01|04|07|10)$ ]]; then
+            echo "📅 Quarterly Rebalancing Week detected."
+            python ISAMB/main.py --mode rebalancing
+          
+          # 2. Bi-weekly Reminder: Run on even weeks (or odd, doesn't matter as long as it's every 2 weeks)
+          #    However, skip if we just ran rebalancing? Or run both? Usually rebalancing includes a report.
+          #    Let's run reminder only if NOT rebalancing.
+          
+          elif (( 10#$WEEK_NUM % 2 == 0 )); then
+            echo "🔔 Bi-weekly Reminder Week detected (Week $WEEK_NUM)."
+            python ISAMB/main.py --mode reminder
+          
+          else
+            echo "zzz This Saturday is an off-week. No action taken."
+          fi

@@ -1,0 +1,7 @@
+gspread
+oauth2client
+finance-datareader
+yfinance
+pandas
+python-telegram-bot
+requests
