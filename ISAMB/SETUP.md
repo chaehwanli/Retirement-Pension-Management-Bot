@@ -24,6 +24,28 @@ The bot reads from this sheet. Make sure the following columns exist (in row 1):
 ### Sheet 4: `Simulation`
 The bot will append simulation results here if implemented.
 
+---
+
+## 4. How to Manage Cash & Rebalancing
+To enable proper rebalancing and cash management, follow these rules in your **Portfolio** sheet:
+
+### 1️⃣ Managing Cash for Buying (예수금 관리)
+*   **Item Name (종목명)**: `현금` or `예수금`
+*   **Ticker (티커)**: `CASH` or `KRW` (Must use one of these exactly!)
+*   **Quantity (보유수량)**: Enter the actual amount of cash in KRW (e.g., `5000000`).
+*   **Avg Price (매수단가)**: `1`
+*   **Current Price (현재가)**: `1` (The bot will strictly maintain this as 1).
+
+### 2️⃣ Setting Target Weights (비중 지정)
+*   Use the **`Target_Weight`** column.
+*   Enter values as **decimals** (e.g., `0.3` for 30%).
+*   **Important**: The sum of all `Target_Weight` values (including CASH) should equal **1.0** (100%).
+    *   Example:
+        *   Samsung Electronics: `0.4` (40%)
+        *   S&P 500 ETF: `0.4` (40%)
+        *   CASH: `0.2` (20%)
+*   If the sum is not 1.0, the bot will still calculate rebalancing based on the relative weights provided, but it's best practice to match 100%.
+
 ## 2. Secrets Configuration (GitHub Actions)
 Go to your Repository -> Settings -> Secrets and variables -> Actions -> New repository secret.
 Add the following:

@@ -13,6 +13,10 @@ class MarketDataFetcher:
         Fetches the latest closing price for a given ticker.
         """
         try:
+            # Handle CASH or KRW
+            if ticker.upper() in ['CASH', 'KRW']:
+                return 1.0
+
             # Check if it's a Korean stock (6 digits)
             if ticker.isdigit() and len(ticker) == 6:
                 df = fdr.DataReader(ticker, datetime.now() - timedelta(days=7))
